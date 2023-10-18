@@ -55,54 +55,54 @@ def isSafeSlot(puzzle, row, col, num):
         all(num != puzzle[row - row % 3 + i][col - col % 3 + j] for i in range(3) for j in range(3)) # check if num is present in a 3x3 square by using the modulo operator to find the left top (first) cell then iterating over each cell to compare it to the square numbers
     )
 
-def forward_check(grid, row, col, num):
-    # Check in the row
-    for i in range(gridSize):
+def forwardChecking(grid, row, col, num): #apply forward checking method
+    # check row
+    for i in range(gridSize): #iterate over the row
         if i != col:
             grid[row][i] = np.delete(grid[row][i], np.where(grid[row][i] == num))
 
-    # Check in the column
-    for i in range(gridSize):
-        if i != row:
-            grid[i][col] = np.delete(grid[i][col], np.where(grid[i][col] == num))
+    # check column
+    for i in range(gridSize): #iterate over the column
+        if i != row: #if the current cell is not the same as the cell we are checking ...
+            grid[i][col] = np.delete(grid[i][col], np.where(grid[i][col] == num)) # then delete the num from the domain of the cell
 
-    # Check in the square
-    square_row, square_col = 3 * (row // 3), 3 * (col // 3)
-    for i in range(square_row, square_row + 3):
-        for j in range(square_col, square_col + 3):
-            if i != row or j != col:
-                grid[i][j] = np.delete(grid[i][j], np.where(grid[i][j] == num))
+    # check square
+    square_row, square_col = 3 * (row // 3), 3 * (col // 3) #find the top left cell of the square
+    for i in range(square_row, square_row + 3): #iterate over the square
+        for j in range(square_col, square_col + 3): #iterate over the square
+            if i != row or j != col: #if the current cell is not the same as the cell we are checking ...
+                grid[i][j] = np.delete(grid[i][j], np.where(grid[i][j] == num)) # then delete the num from the domain of the cell
 
-def solve_sudoku_with_forward_checking(grid):
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+def solutionForwardChecking(grid): #solve sudoku using forward checking
+    for event in pygame.event.get(): #get the events from the pygame
+        if event.type == pygame.QUIT: #if the event is quit then quit the game, when the user clicks on the close button
+            pygame.quit() #quit the game
+            sys.exit() #exit the game
 
-    for i in range(gridSize):
-        for j in range(gridSize):
-            if grid[i][j] == 0:
-                for num in range(1, 10):
-                    if isSafeSlot(grid, i, j, num):
-                        pygame.time.delay(100)
-                        makeNumbers(grid)
-                        pygame.display.update()
+    for i in range(gridSize): #iterate over the rows of the grid
+        for j in range(gridSize): #iterate over the columns of the grid
+            if grid[i][j] == 0: #if the current cell is empty
+                for num in range(1, 10): #iterate over the domain of the cell
+                    if isSafeSlot(grid, i, j, num): #if the number is safe to put in the cell
+                        pygame.time.delay(100)#delay for 100 milliseconds
+                        makeNumbers(grid) #draw the numbers on the screen
+                        pygame.display.update() #update the screen display
 
                         clearCell(i, j)  # Clear the cell
-                        pygame.display.update()
+                        pygame.display.update() 
 
-                        grid[i][j] = num
-                        forward_check(grid, i, j, num)
+                        grid[i][j] = num #put the number in the cell
+                        forwardChecking(grid, i, j, num) #apply forward checking to the cell
                         makeNumbers(grid)
                         pygame.display.update()
 
-                        if solve_sudoku_with_forward_checking(grid):
+                        if solutionForwardChecking(grid): #recursively call the function to solve the sudoku
                             return True
 
                         pygame.time.delay(100)
-                        grid[i][j] = 0
-                        makeNumbers(grid)
-                        pygame.display.update()
+                        grid[i][j] = 0 #if the number is not safe to put in the cell then set the cell to 0
+                        makeNumbers(grid) 
+                        pygame.display.update() #update the screen display
 
                 return False
 
@@ -110,35 +110,35 @@ def solve_sudoku_with_forward_checking(grid):
 
 def main():
     # Read Sudoku data
-    sudoku_df = pd.DataFrame(pd.read_csv('sudoku.csv', nrows=20))
+    sudoku_df = pd.DataFrame(pd.read_csv('sudoku.csv', nrows=20)) #read the first 20 rows of the csv file and store it in a dataframe
     
-    for idx in range(20):
-        puzzle = np.reshape(list(sudoku_df.puzzle.values[idx]), (gridSize, gridSize)).astype(int)
+    for idx in range(20): #iterate from 0 to 19
+        puzzle = np.reshape(list(sudoku_df.puzzle.values[idx]), (gridSize, gridSize)).astype(int) #reshape the puzzle(the 20 nums taken) into a 9x9 grid
 
-        start_time = time.time()  # Record start time
+        startingTime = time.time()  # Record start time
 
         # Main loop
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+        while True: #infinite loop
+            for event in pygame.event.get(): #get the events from the pygame
+                if event.type == pygame.QUIT: #pygame.QUIT is the event type that is fired when the user clicks on the close button of the window
+                    pygame.quit() #pygame.quit() is used to uninitialize all pygame modules
+                    sys.exit() #sys.exit() is used to exit the program
 
-            screen.fill(white)
+            screen.fill(white) #fill the screen with white color to erase the screen / clear the screen
             makeGrid()
-            makeNumbers(puzzle)
+            makeNumbers(puzzle) #draw the numbers on the screen
             pygame.display.update()
 
             # Solve Sudoku with Forward Checking and visualize the process
-            if solve_sudoku_with_forward_checking(puzzle):
-                pygame.time.delay(3000)  # Pause for a few seconds after solving
-                break
+            if solutionForwardChecking(puzzle): #if the sudoku is solved 
+                pygame.time.delay(3000)  
+                break #then break out of the loop
 
-        end_time = time.time()  # Record end time
-        elapsed_time = end_time - start_time
-        print(f"Sudoku {idx + 1} solved with Forward Checking in {elapsed_time:.2f} seconds.")
+        endTime = time.time()  # Record end time
+        elapsedTime = endTime - startingTime #calculate the elapsed time
+        print(f"Sudoku {idx + 1} solved with Forward Checking in {elapsedTime:.2f} seconds.") #print the elapsed time
 
-    pygame.quit()
+    pygame.quit() #uninitialize all pygame modules
 
 if __name__ == "__main__":
     main()

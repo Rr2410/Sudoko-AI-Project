@@ -56,53 +56,53 @@ def isSafeSlot(puzzle, row, col, num):
     )
 
 
-def apply_arc_consistency(puzzle, row, col, num):
-    # Apply arc consistency in the row
-    for i in range(gridSize):
-        if i != col:
-            puzzle[row][i] = np.delete(puzzle[row][i], np.where(puzzle[row][i] == num))
+def applyAC(puzzle, row, col, num): #apply arc consistency method
+    
+    for i in range(gridSize):#iterate over the row
+        if i != col: #if the current cell is not the same as the cell we are checking ...
+            puzzle[row][i] = np.delete(puzzle[row][i], np.where(puzzle[row][i] == num)) # then delete the num from the domain of the cell
 
-    # Apply arc consistency in the column
-    for i in range(gridSize):
+    
+    for i in range(gridSize):#iterate over the column
         if i != row:
-            puzzle[i][col] = np.delete(puzzle[i][col], np.where(puzzle[i][col] == num))
+            puzzle[i][col] = np.delete(puzzle[i][col], np.where(puzzle[i][col] == num)) 
 
     # Apply arc consistency in the square
-    square_row, square_col = 3 * (row // 3), 3 * (col // 3)
-    for i in range(square_row, square_row + 3):
-        for j in range(square_col, square_col + 3):
-            if i != row or j != col:
-                puzzle[i][j] = np.delete(puzzle[i][j], np.where(puzzle[i][j] == num))
+    square_row, square_col = 3 * (row // 3), 3 * (col // 3) #find the top left cell of the square
+    for i in range(square_row, square_row + 3): #iterate over the rows of the square
+        for j in range(square_col, square_col + 3): #iterate over the columns of the square
+            if i != row or j != col: #if the current cell is not the same as the cell we are checking ...
+                puzzle[i][j] = np.delete(puzzle[i][j], np.where(puzzle[i][j] == num)) # then delete the num from the domain of the cell
 
-def solve_sudoku_with_arc_consistency(puzzle):
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+def solutionMAC(puzzle): #solution using maintiaintm arc consistency method
+    for event in pygame.event.get(): #get the events from the pygame
+        if event.type == pygame.QUIT: #pygame.QUIT is the event type that is fired when the user clicks on the close button of the window
+            pygame.quit() #pygame.quit() is used to uninitialize all pygame modules
+            sys.exit() #sys.exit() is used to exit the program
 
-    for i in range(gridSize):
-        for j in range(gridSize):
-            if puzzle[i][j] == 0:
-                for num in range(1, 10):
-                    if isSafeSlot(puzzle, i, j, num):
-                        pygame.time.delay(100)
-                        makeNumbers(puzzle)
-                        pygame.display.update()
+    for i in range(gridSize): #outer loop that iterates over the rows of the grid
+        for j in range(gridSize): # inner loop that iterates over the columns of the grid
+            if puzzle[i][j] == 0: #checks if the value in the current cell of the grid is equal to 0
+                for num in range(1, 10): #iterate from 1 to 9
+                    if isSafeSlot(puzzle, i, j, num): #checks if the current cell is safe to place the number in using the predefined function isSafeSlot()
+                        pygame.time.delay(100) #delay the program for 100 milliseconds for visualization purposes, so that the visual isnt too fast
+                        makeNumbers(puzzle) #draw the numbers on the screen
+                        pygame.display.update() #update the current screen display
 
                         clearCell(i, j)  # Clear the cell
+                        pygame.display.update() #update the current screen display
+
+                        puzzle[i][j] = num #assign the current cell to the number
+                        applyAC(puzzle, i, j, num) #apply arc consistency
+                        makeNumbers(puzzle) #
                         pygame.display.update()
 
-                        puzzle[i][j] = num
-                        apply_arc_consistency(puzzle, i, j, num)
-                        makeNumbers(puzzle)
-                        pygame.display.update()
-
-                        if solve_sudoku_with_arc_consistency(puzzle):
+                        if solutionMAC(puzzle): #recursively call the function solutionBT() to solve the rest of the puzzle
                             return True
 
-                        pygame.time.delay(100)
-                        puzzle[i][j] = 0
-                        makeNumbers(puzzle)
+                        pygame.time.delay(100) 
+                        puzzle[i][j] = 0 #if the puzzle is not solved, assign the current cell to 0
+                        makeNumbers(puzzle) #
                         pygame.display.update()
 
                 return False
@@ -111,33 +111,33 @@ def solve_sudoku_with_arc_consistency(puzzle):
 
 def main():
     # Read Sudoku data
-    sudoku_df = pd.DataFrame(pd.read_csv('sudoku.csv', nrows=20))
+    sudoku_df = pd.DataFrame(pd.read_csv('sudoku.csv', nrows=20)) #read the first 20 rows of the csv file and store it in a dataframe
 
-    for idx in range(20):
-        puzzle = np.reshape(list(sudoku_df.puzzle.values[idx]), (gridSize, gridSize)).astype(int)
+    for idx in range(20): #iterate from 0 to 19
+        puzzle = np.reshape(list(sudoku_df.puzzle.values[idx]), (gridSize, gridSize)).astype(int) #reshape the puzzle(the 20 nums taken) into a 9x9 grid
 
-        start_time = time.time()  # Record start time
+        StartingTime = time.time()  # Record start time
 
         # Main loop
         while True:
-            for event in pygame.event.get():
+            for event in pygame.event.get(): #
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
-            screen.fill(white)
-            makeGrid()
-            makeNumbers(puzzle)
+            screen.fill(white) #fill the screen with white color to erase the screen / clear the screen
+            makeGrid() #draw new grid lines
+            makeNumbers(puzzle) 
             pygame.display.update()
 
             # Solve Sudoku with Maintaining Arc-Consistency and visualize the process
-            if solve_sudoku_with_arc_consistency(puzzle):
+            if solutionMAC(puzzle): 
                 pygame.time.delay(3000)  # Pause for a few seconds after solving
-                break
+                break #break out of the loop
 
-        end_time = time.time()  # Record end time
-        elapsed_time = end_time - start_time
-        print(f"Sudoku {idx + 1} solved with Maintaining Arc-Consistency in {elapsed_time:.2f} seconds.")
+        endTime = time.time()  # Record end time
+        elapsedTime = endTime - StartingTime
+        print(f"Sudoku {idx + 1} solved with Maintaining Arc-Consistency in {elapsedTime:.2f} seconds.") #print the elapsed time using f string
 
     pygame.quit()
 
