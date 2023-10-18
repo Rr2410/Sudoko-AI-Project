@@ -55,34 +55,34 @@ def isSafeSlot(puzzle, row, col, num):
         all(num != puzzle[row - row % 3 + i][col - col % 3 + j] for i in range(3) for j in range(3)) # check if num is present in a 3x3 square by using the modulo operator to find the left top (first) cell then iterating over each cell to compare it to the square numbers
     )
 
-def solve_sudoku(puzzle):
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+def solutionBT(puzzle): #backtracking algorithm
+    for event in pygame.event.get(): #pygame.event.get() gets all the events from the event queue
+        if event.type == pygame.QUIT: #pygame.QUIT is the event type that is fired when the user clicks on the close button of the window
+            pygame.quit() #pygame.quit() is used to uninitialize all pygame modules
+            sys.exit() #sys.exit() is used to exit the program
 
-    for i in range(gridSize):
-        for j in range(gridSize):
-            if puzzle[i][j] == 0:
-                for num in range(1, 10):
-                    if isSafeSlot(puzzle, i, j, num):
-                        pygame.time.delay(100)
-                        makeNumbers(puzzle)
-                        pygame.display.update()
+    for i in range(gridSize): #outer loop that iterates over the rows of the grid
+        for j in range(gridSize): # inner loop that iterates over the columns of the grid
+            if puzzle[i][j] == 0: #checks if the value in the current cell of the grid is equal to 0
+                for num in range(1, 10): #iterate from 1 to 9
+                    if isSafeSlot(puzzle, i, j, num): #checks if the current cell is safe to place the number in using the predefined function isSafeSlot()
+                        pygame.time.delay(100) #delay the program for 100 milliseconds for visualization purposes, so that the visual isnt too fast
+                        makeNumbers(puzzle) #draw the numbers on the screen
+                        pygame.display.update() #update the current screen display 
 
                         clearCell(i, j)  # Clear the cell
                         pygame.display.update()
 
-                        puzzle[i][j] = num
-                        makeNumbers(puzzle)
+                        puzzle[i][j] = num #assign the current cell to the number
+                        makeNumbers(puzzle) #draw the numbers on the screen
                         pygame.display.update()
 
-                        if solve_sudoku(puzzle):
-                            return True
+                        if solutionBT(puzzle):#recursively call the function solutionBT() to solve the rest of the puzzle
+                            return True #if the puzzle is solved return true
 
-                        pygame.time.delay(100)
-                        puzzle[i][j] = 0
-                        makeNumbers(puzzle)
+                        pygame.time.delay(100) #
+                        puzzle[i][j] = 0 #if the puzzle is not solved, assign the current cell to 0
+                        makeNumbers(puzzle) #
                         pygame.display.update()
 
                 return False
@@ -91,12 +91,12 @@ def solve_sudoku(puzzle):
 
 def main():
     # Read Sudoku data 
-    sudoku_df = pd.DataFrame(pd.read_csv('sudoku.csv', nrows=20))
+    sudoku_df = pd.DataFrame(pd.read_csv('sudoku.csv', nrows=20)) #read the first 20 rows of the csv file and store it in a dataframe
     
-    for idx in range(20):
-        puzzle = np.reshape(list(sudoku_df.puzzle.values[idx]), (gridSize, gridSize)).astype(int)
+    for idx in range(20): #iterate from 0 to 19
+        puzzle = np.reshape(list(sudoku_df.puzzle.values[idx]), (gridSize, gridSize)).astype(int) #reshape the puzzle(the 20 nums taken) into a 9x9 grid
 
-        start_time = time.time()  # Record start time
+        startingTime = time.time()  # Record start time
 
         # Main loop
         while True:
@@ -105,21 +105,21 @@ def main():
                     pygame.quit()
                     sys.exit()
 
-            screen.fill(white)
-            makeGrid()
-            makeNumbers(puzzle)
+            screen.fill(white) #fill the screen with white color to erase the screen / clear the screen
+            makeGrid() #draw new grid lines
+            makeNumbers(puzzle) #
             pygame.display.update()
 
-            # Solve Sudoku and visualize the process
-            if solve_sudoku(puzzle):
-                pygame.time.delay(3000)  # Pause for a few seconds after solving
+            
+            if solutionBT(puzzle): #call the solutionBT() function to solve the puzzle
+                pygame.time.delay(3000)  # Pause for a few seconds after solving 
                 break
 
-        end_time = time.time()  # Record end time
-        elapsed_time = end_time - start_time
-        print(f"Sudoku {idx + 1} solved in {elapsed_time:.2f} seconds.")
+        endTime = time.time()  # Record end time
+        elapsedTime = endTime - startingTime #calculate the elapsed time
+        print(f"Sudoku {idx + 1} solved in {elapsedTime:.2f} seconds.") #print the elapsed time
 
     pygame.quit()
 
-if __name__ == "__main__":
+if __name__ == "__main__": #this is the main function that is called when the program is run
     main()
