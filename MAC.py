@@ -102,7 +102,7 @@ def solutionMAC(puzzle): #solution using maintiaintm arc consistency method
 
                         pygame.time.delay(100) 
                         puzzle[i][j] = 0 #if the puzzle is not solved, assign the current cell to 0
-                        makeNumbers(puzzle) #
+                        makeNumbers(puzzle) 
                         pygame.display.update()
 
                 return False
@@ -132,7 +132,7 @@ def main():
 
             # Solve Sudoku with Maintaining Arc-Consistency and visualize the process
             if solutionMAC(puzzle): 
-                pygame.time.delay(3000)  # Pause for a few seconds after solving
+                pygame.time.delay(5000)  # Pause for a 5 seconds after solving so the user gets a chance to see the solution before it starts displaying the next puzzle
                 break #break out of the loop
 
         endTime = time.time()  # Record end time

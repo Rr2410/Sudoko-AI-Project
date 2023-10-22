@@ -131,7 +131,7 @@ def main():
 
             # Solve Sudoku with Forward Checking and visualize the process
             if solutionForwardChecking(puzzle): #if the sudoku is solved 
-                pygame.time.delay(3000)  
+                pygame.time.delay(5000)  # Pause for a 5 seconds after solving so the user gets a chance to see the solution before it starts displaying the next puzzle
                 break #then break out of the loop
 
         endTime = time.time()  # Record end time
