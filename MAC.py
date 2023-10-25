@@ -18,7 +18,7 @@ pygame.init() #starting the visual interface to see the game
 
 # display screen
 screen = pygame.display.set_mode((Width, Height)) # using pygame.display for display
-pygame.display.set_caption("Sudoku solving visualizer for CS361") 
+pygame.display.set_caption("Sudoku solving visualizer for CS361, MaintainingArcConsistency.") 
 
 # initialize the font and size
 font = pygame.font.Font(None, 36)
